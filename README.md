@@ -1,2 +1,2 @@
-# Dispatcher
-a simple dynamic dispatcher
+# simple-dispatcher
+route-based dynamic dispatcher
