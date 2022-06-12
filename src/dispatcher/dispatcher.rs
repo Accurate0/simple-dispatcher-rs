@@ -1,6 +1,8 @@
 use crate::Executor;
 use std::{collections::HashMap, ops::Try, option::Option, sync::Arc};
 
+type DispatcherResult<T> = Result<T, Box<dyn std::error::Error>>;
+
 pub struct Dispatcher<TCtx, TRequest, TResponse>
 where
     TResponse: Try + Try<Output = TResponse>,
@@ -33,22 +35,26 @@ where
         self
     }
 
-    async fn execute_fallback(&self, request: &TRequest) -> TResponse {
-        self.fallback.execute(&request, &self.context).await
+    async fn execute_fallback(&self, request: &TRequest) -> DispatcherResult<TResponse> {
+        Ok(self.fallback.execute(&request, &self.context).await)
     }
 
-    pub async fn dispatch<TFunc, TOut>(&self, request: &TRequest, get_path: TFunc) -> TResponse
+    pub async fn dispatch<TFunc, TOut>(
+        &self,
+        request: &TRequest,
+        get_path: TFunc,
+    ) -> DispatcherResult<TResponse>
     where
         TFunc: Fn() -> Option<String>,
     {
         if let Some(resource_path) = get_path() {
             if let Some(route) = self.routes.get(&resource_path) {
-                route.execute(&request, &self.context).await?
+                Ok(route.execute(&request, &self.context).await)
             } else {
-                self.execute_fallback(&request).await?
+                self.execute_fallback(&request).await
             }
         } else {
-            self.execute_fallback(&request).await?
+            self.execute_fallback(&request).await
         }
     }
 }
