@@ -1,30 +1,27 @@
 use crate::Executor;
-use std::{
-    collections::HashMap,
-    convert::Infallible,
-    ops::{FromResidual, Try},
-    option::Option,
-    sync::Arc,
-};
+use std::{collections::HashMap, ops::Try, option::Option, sync::Arc};
 
 pub struct Dispatcher<TCtx, TRequest, TResponse>
 where
-    TResponse: Try + Try<Output = TResponse> + FromResidual<Option<Infallible>>,
+    TResponse: Try + Try<Output = TResponse>,
 {
     context: TCtx,
-    fallback: Option<Arc<dyn Executor<TCtx, TRequest, TResponse> + Send + Sync>>,
+    fallback: Arc<dyn Executor<TCtx, TRequest, TResponse> + Send + Sync>,
     routes: HashMap<String, Arc<dyn Executor<TCtx, TRequest, TResponse> + Send + Sync>>,
 }
 
 impl<TCtx, TRequest, TResponse> Dispatcher<TCtx, TRequest, TResponse>
 where
-    TResponse: Try + Try<Output = TResponse> + FromResidual<Option<Infallible>>,
+    TResponse: Try + Try<Output = TResponse>,
 {
-    pub fn new(context: TCtx) -> Self {
+    pub fn new<E: 'static>(context: TCtx, fallback: E) -> Self
+    where
+        E: Executor<TCtx, TRequest, TResponse> + Send + Sync,
+    {
         Self {
             routes: HashMap::new(),
             context,
-            fallback: None,
+            fallback: Arc::new(fallback),
         }
     }
 
@@ -36,20 +33,8 @@ where
         self
     }
 
-    pub fn set_fallback<E: 'static>(mut self, executor: E) -> Self
-    where
-        E: Executor<TCtx, TRequest, TResponse> + Send + Sync,
-    {
-        self.fallback = Some(Arc::new(executor));
-        self
-    }
-
-    async fn execute_fallback(&self, request: &TRequest) -> Option<TResponse> {
-        if let Some(fallback) = &self.fallback {
-            Some(fallback.execute(&request, &self.context).await)
-        } else {
-            None
-        }
+    async fn execute_fallback(&self, request: &TRequest) -> TResponse {
+        self.fallback.execute(&request, &self.context).await
     }
 
     pub async fn dispatch<TFunc, TOut>(&self, request: &TRequest, get_path: TFunc) -> TResponse
