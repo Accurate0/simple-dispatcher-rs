@@ -1,6 +1,6 @@
 [package]
 name = "simple-dispatcher"
-version = "0.1.2"
+version = "0.2.0"
 edition = "2021"
 license = "MIT"
 description = "simple dispatcher"
@@ -10,3 +10,6 @@ repository = "https://github.com/Accurate0/dispatcher-rs"
 
 [dependencies]
 async-trait = "0.1.56"
+
+[dev-dependencies]
+tokio-test = "0.4.2"

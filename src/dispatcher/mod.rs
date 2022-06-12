@@ -1,3 +1,5 @@
-mod dispatcher;
+mod request_dispatcher;
+mod route_dispatcher;
 
-pub use dispatcher::Dispatcher;
+pub use request_dispatcher::RequestDispatcher;
+pub use route_dispatcher::RouteDispatcher;
