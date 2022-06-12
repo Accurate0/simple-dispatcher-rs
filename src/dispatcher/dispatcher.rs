@@ -1,21 +1,13 @@
-use crate::Executor;
-use std::{collections::HashMap, ops::Try, option::Option, sync::Arc};
+use crate::{DispatcherResult, Executor};
+use std::{collections::HashMap, option::Option, sync::Arc};
 
-type DispatcherResult<T> = Result<T, Box<dyn std::error::Error>>;
-
-pub struct Dispatcher<TCtx, TRequest, TResponse>
-where
-    TResponse: Try + Try<Output = TResponse>,
-{
+pub struct Dispatcher<TCtx, TRequest, TResponse> {
     context: TCtx,
     fallback: Arc<dyn Executor<TCtx, TRequest, TResponse> + Send + Sync>,
     routes: HashMap<String, Arc<dyn Executor<TCtx, TRequest, TResponse> + Send + Sync>>,
 }
 
-impl<TCtx, TRequest, TResponse> Dispatcher<TCtx, TRequest, TResponse>
-where
-    TResponse: Try + Try<Output = TResponse>,
-{
+impl<TCtx, TRequest, TResponse> Dispatcher<TCtx, TRequest, TResponse> {
     pub fn new<E: 'static>(context: TCtx, fallback: E) -> Self
     where
         E: Executor<TCtx, TRequest, TResponse> + Send + Sync,
@@ -36,10 +28,10 @@ where
     }
 
     async fn execute_fallback(&self, request: &TRequest) -> DispatcherResult<TResponse> {
-        Ok(self.fallback.execute(&request, &self.context).await)
+        self.fallback.execute(&request, &self.context).await
     }
 
-    pub async fn dispatch<TFunc, TOut>(
+    pub async fn dispatch<TFunc>(
         &self,
         request: &TRequest,
         get_path: TFunc,
@@ -49,7 +41,7 @@ where
     {
         if let Some(resource_path) = get_path() {
             if let Some(route) = self.routes.get(&resource_path) {
-                Ok(route.execute(&request, &self.context).await)
+                route.execute(&request, &self.context).await
             } else {
                 self.execute_fallback(&request).await
             }
