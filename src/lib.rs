@@ -5,6 +5,8 @@ mod request;
 pub use dispatcher::RequestDispatcher;
 pub use dispatcher::RouteDispatcher;
 pub use executor::Executor;
+pub use executor::ExecutorError;
+pub use executor::ExecutorResult;
 pub use request::Request;
 
 #[cfg(test)]
