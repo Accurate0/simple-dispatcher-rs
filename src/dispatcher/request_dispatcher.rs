@@ -1,4 +1,8 @@
-use crate::{request::BaseRequest, DispatcherResult, DynamicExecutor, Executor, Request};
+use crate::{
+    executor::{DynamicExecutor, ExecutorResult},
+    request::BaseRequest,
+    Executor, Request,
+};
 use std::{collections::HashMap, sync::Arc};
 
 pub struct RequestDispatcher<TCtx, TRequest, TResponse> {
@@ -28,7 +32,7 @@ impl<TCtx, TResponse> RequestDispatcher<TCtx, Request, TResponse> {
         self
     }
 
-    pub async fn dispatch(&self, request: Request) -> DispatcherResult<TResponse> {
+    pub async fn dispatch(&self, request: Request) -> ExecutorResult<TResponse> {
         if let Some(executor) = self.request_map.get(&request) {
             executor.execute(&self.context, &request).await
         } else {

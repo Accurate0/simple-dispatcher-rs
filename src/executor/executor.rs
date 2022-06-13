@@ -1,8 +1,8 @@
 use async_trait::async_trait;
 
-use crate::DispatcherResult;
+use super::ExecutorResult;
 
 #[async_trait]
 pub trait Executor<TCtx, TRequest, TResponse> {
-    async fn execute(&self, context: &TCtx, request: &TRequest) -> DispatcherResult<TResponse>;
+    async fn execute(&self, context: &TCtx, request: &TRequest) -> ExecutorResult<TResponse>;
 }

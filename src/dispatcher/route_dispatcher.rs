@@ -1,4 +1,7 @@
-use crate::{DispatcherResult, DynamicExecutor, Executor};
+use crate::{
+    executor::{DynamicExecutor, ExecutorResult},
+    Executor,
+};
 use std::{collections::HashMap, option::Option, sync::Arc};
 
 pub struct RouteDispatcher<TCtx, TRequest, TResponse> {
@@ -27,7 +30,7 @@ impl<TCtx, TRequest, TResponse> RouteDispatcher<TCtx, TRequest, TResponse> {
         self
     }
 
-    pub async fn dispatch<TFunc>(&self, request: &TRequest, get_path: TFunc) -> DispatcherResult<TResponse>
+    pub async fn dispatch<TFunc>(&self, request: &TRequest, get_path: TFunc) -> ExecutorResult<TResponse>
     where
         TFunc: Fn() -> Option<String>,
     {
@@ -42,7 +45,7 @@ impl<TCtx, TRequest, TResponse> RouteDispatcher<TCtx, TRequest, TResponse> {
         }
     }
 
-    async fn execute_fallback(&self, request: &TRequest) -> DispatcherResult<TResponse> {
+    async fn execute_fallback(&self, request: &TRequest) -> ExecutorResult<TResponse> {
         self.fallback.execute(&self.context, &request).await
     }
 }

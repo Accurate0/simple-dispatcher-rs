@@ -2,19 +2,14 @@ mod dispatcher;
 mod executor;
 mod request;
 
-use std::sync::Arc;
-
 pub use dispatcher::RequestDispatcher;
 pub use dispatcher::RouteDispatcher;
 pub use executor::Executor;
 pub use request::Request;
 
-type DispatcherResult<T> = Result<T, Box<dyn std::error::Error + Send + Sync + 'static>>;
-type DynamicExecutor<TCtx, TRequest, TResponse> = Arc<dyn Executor<TCtx, TRequest, TResponse> + Send + Sync>;
-
 #[cfg(test)]
 mod tests {
-    use crate::{dispatcher::RequestDispatcher, Executor, Request, RouteDispatcher};
+    use crate::{dispatcher::RequestDispatcher, executor::ExecutorResult, Executor, Request, RouteDispatcher};
     use async_trait::async_trait;
 
     struct Context;
@@ -38,28 +33,28 @@ mod tests {
 
     #[async_trait]
     impl Executor<Context, TestRequest, Response> for Fallback {
-        async fn execute(&self, _ctx: &Context, _request: &TestRequest) -> Result<Response, Error> {
+        async fn execute(&self, _ctx: &Context, _request: &TestRequest) -> ExecutorResult<Response> {
             error()
         }
     }
 
     #[async_trait]
     impl Executor<Context, Request, Response> for Fallback {
-        async fn execute(&self, _ctx: &Context, _request: &Request) -> Result<Response, Error> {
+        async fn execute(&self, _ctx: &Context, _request: &Request) -> ExecutorResult<Response> {
             error()
         }
     }
 
     #[async_trait]
     impl Executor<Context, TestRequest, Response> for Root {
-        async fn execute(&self, _ctx: &Context, _request: &TestRequest) -> Result<Response, Error> {
+        async fn execute(&self, _ctx: &Context, _request: &TestRequest) -> ExecutorResult<Response> {
             success()
         }
     }
 
     #[async_trait]
     impl Executor<Context, Request, Response> for Root {
-        async fn execute(&self, _ctx: &Context, _request: &Request) -> Result<Response, Error> {
+        async fn execute(&self, _ctx: &Context, _request: &Request) -> ExecutorResult<Response> {
             success()
         }
     }
