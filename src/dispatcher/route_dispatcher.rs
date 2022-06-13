@@ -4,16 +4,16 @@ use crate::{
 };
 use std::{collections::HashMap, option::Option, sync::Arc};
 
-pub struct RouteDispatcher<TCtx, TRequest, TResponse> {
-    context: TCtx,
-    fallback: DynamicExecutor<TCtx, TRequest, TResponse>,
-    routes: HashMap<String, DynamicExecutor<TCtx, TRequest, TResponse>>,
+pub struct RouteDispatcher<TContext, TRequest, TResponse> {
+    context: TContext,
+    fallback: DynamicExecutor<TContext, TRequest, TResponse>,
+    routes: HashMap<String, DynamicExecutor<TContext, TRequest, TResponse>>,
 }
 
-impl<TCtx, TRequest, TResponse> RouteDispatcher<TCtx, TRequest, TResponse> {
-    pub fn new<E: 'static>(context: TCtx, fallback: E) -> Self
+impl<TContext, TRequest, TResponse> RouteDispatcher<TContext, TRequest, TResponse> {
+    pub fn new<E: 'static>(context: TContext, fallback: E) -> Self
     where
-        E: Executor<TCtx, TRequest, TResponse> + Send + Sync,
+        E: Executor<TContext, TRequest, TResponse> + Send + Sync,
     {
         Self {
             routes: HashMap::new(),
@@ -24,7 +24,7 @@ impl<TCtx, TRequest, TResponse> RouteDispatcher<TCtx, TRequest, TResponse> {
 
     pub fn add_route<E: 'static>(mut self, path: &str, executor: E) -> Self
     where
-        E: Executor<TCtx, TRequest, TResponse> + Send + Sync,
+        E: Executor<TContext, TRequest, TResponse> + Send + Sync,
     {
         self.routes.insert(path.to_string(), Arc::new(executor));
         self

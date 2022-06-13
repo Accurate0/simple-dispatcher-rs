@@ -5,16 +5,16 @@ use crate::{
 };
 use std::{collections::HashMap, sync::Arc};
 
-pub struct RequestDispatcher<TCtx, TRequest, TResponse> {
-    context: TCtx,
-    fallback: DynamicExecutor<TCtx, TRequest, TResponse>,
-    request_map: HashMap<Request, DynamicExecutor<TCtx, TRequest, TResponse>>,
+pub struct RequestDispatcher<TContext, TRequest, TResponse> {
+    context: TContext,
+    fallback: DynamicExecutor<TContext, TRequest, TResponse>,
+    request_map: HashMap<Request, DynamicExecutor<TContext, TRequest, TResponse>>,
 }
 
-impl<TCtx, TResponse> RequestDispatcher<TCtx, Request, TResponse> {
-    pub fn new<E: 'static>(context: TCtx, fallback: E) -> Self
+impl<TContext, TResponse> RequestDispatcher<TContext, Request, TResponse> {
+    pub fn new<E: 'static>(context: TContext, fallback: E) -> Self
     where
-        E: Executor<TCtx, Request, TResponse> + Send + Sync,
+        E: Executor<TContext, Request, TResponse> + Send + Sync,
     {
         Self {
             context,
@@ -26,7 +26,7 @@ impl<TCtx, TResponse> RequestDispatcher<TCtx, Request, TResponse> {
     pub fn add_request<R: 'static, E: 'static>(mut self, request: R, executor: E) -> Self
     where
         R: BaseRequest + Send + Sync,
-        E: Executor<TCtx, Request, TResponse> + Send + Sync,
+        E: Executor<TContext, Request, TResponse> + Send + Sync,
     {
         self.request_map.insert(Box::new(request), Arc::new(executor));
         self
