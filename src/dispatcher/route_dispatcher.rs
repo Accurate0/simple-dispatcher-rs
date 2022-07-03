@@ -4,6 +4,7 @@ use crate::{
 };
 use std::{collections::HashMap, option::Option, sync::Arc};
 
+// TODO: add concept of methods
 pub struct RouteDispatcher<TContext, TRequest, TResponse> {
     context: TContext,
     fallback: DynamicExecutor<TContext, TRequest, TResponse>,

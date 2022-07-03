@@ -1,17 +1,14 @@
 mod dispatcher;
 mod executor;
-mod request;
 
-pub use dispatcher::RequestDispatcher;
 pub use dispatcher::RouteDispatcher;
 pub use executor::Executor;
 pub use executor::ExecutorError;
 pub use executor::ExecutorResult;
-pub use request::Request;
 
 #[cfg(test)]
 mod tests {
-    use crate::{dispatcher::RequestDispatcher, executor::ExecutorResult, Executor, Request, RouteDispatcher};
+    use crate::{executor::ExecutorResult, Executor, RouteDispatcher};
     use async_trait::async_trait;
 
     struct Context;
@@ -41,22 +38,8 @@ mod tests {
     }
 
     #[async_trait]
-    impl Executor<Context, Request, Response> for Fallback {
-        async fn execute(&self, _ctx: &Context, _request: &Request) -> ExecutorResult<Response> {
-            error()
-        }
-    }
-
-    #[async_trait]
     impl Executor<Context, TestRequest, Response> for Root {
         async fn execute(&self, _ctx: &Context, _request: &TestRequest) -> ExecutorResult<Response> {
-            success()
-        }
-    }
-
-    #[async_trait]
-    impl Executor<Context, Request, Response> for Root {
-        async fn execute(&self, _ctx: &Context, _request: &Request) -> ExecutorResult<Response> {
             success()
         }
     }
@@ -81,23 +64,6 @@ mod tests {
         let ctx = Context {};
         let dispatcher = RouteDispatcher::new(ctx, Fallback).add_route("/", Root);
         let failed = aw!(dispatcher.dispatch(&TestRequest, || Some("/2222".to_string())));
-        assert_eq!(failed.is_err(), true);
-    }
-
-    #[test]
-    fn request_dispatcher() {
-        let ctx = Context {};
-        let dispatcher = RequestDispatcher::new(ctx, Fallback).add_request(TestRequest, Root);
-
-        let response = aw!(dispatcher.dispatch(Box::new(TestRequest)));
-        assert_eq!(response.unwrap().code, 2);
-    }
-
-    #[test]
-    fn request_dispatcher_fallback() {
-        let ctx = Context {};
-        let dispatcher = RequestDispatcher::new(ctx, Fallback);
-        let failed = aw!(dispatcher.dispatch(Box::new(TestRequest)));
         assert_eq!(failed.is_err(), true);
     }
 }
