@@ -37,16 +37,16 @@ impl<TContext, TRequest, TResponse> RouteDispatcher<TContext, TRequest, TRespons
     {
         if let Some(resource_path) = get_path() {
             if let Some(route) = self.routes.get(&resource_path) {
-                route.execute(&self.context, &request).await
+                route.execute(&self.context, request).await
             } else {
-                self.execute_fallback(&request).await
+                self.execute_fallback(request).await
             }
         } else {
-            self.execute_fallback(&request).await
+            self.execute_fallback(request).await
         }
     }
 
     async fn execute_fallback(&self, request: &TRequest) -> ExecutorResult<TResponse> {
-        self.fallback.execute(&self.context, &request).await
+        self.fallback.execute(&self.context, request).await
     }
 }

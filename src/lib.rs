@@ -64,6 +64,6 @@ mod tests {
         let ctx = Context {};
         let dispatcher = RouteDispatcher::new(ctx, Fallback).add_route("/", Root);
         let failed = aw!(dispatcher.dispatch(&TestRequest, || Some("/2222".to_string())));
-        assert_eq!(failed.is_err(), true);
+        assert!(failed.is_err());
     }
 }
