@@ -53,7 +53,7 @@ mod tests {
     #[test]
     fn route_dispatcher() {
         let ctx = Context {};
-        let dispatcher = RouteDispatcher::new(ctx, Fallback).add_route("/", Root);
+        let dispatcher = RouteDispatcher::new(ctx, Fallback, Fallback).add_route("/", Root);
 
         let response = aw!(dispatcher.dispatch(&TestRequest, || Some("/".to_string())));
         assert_eq!(response.unwrap().code, 2);
@@ -62,7 +62,7 @@ mod tests {
     #[test]
     fn route_dispatcher_fallback() {
         let ctx = Context {};
-        let dispatcher = RouteDispatcher::new(ctx, Fallback).add_route("/", Root);
+        let dispatcher = RouteDispatcher::new(ctx, Fallback, Fallback).add_route("/", Root);
         let failed = aw!(dispatcher.dispatch(&TestRequest, || Some("/2222".to_string())));
         assert!(failed.is_err());
     }
